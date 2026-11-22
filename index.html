@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Luyện nói tiếng Anh – Audio theo chủ đề</title>
+<style>
+:root{--bg:#f3f6f4;--card:#fff;--ink:#16302b;--mute:#5b706b;--accent:#1d6f5f;--accent2:#e4efec;--line:#d5e0dc;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1a18;--card:#162623;--ink:#e6f1ee;--mute:#93aaa4;--accent:#5fc4ae;--accent2:#1d3631;--line:#26403b}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Georgia,"Times New Roman",serif}
+main{max-width:720px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:26px;margin:8px 0 4px}
+p.sub{color:var(--mute);margin:0 0 16px;font-family:system-ui,sans-serif;font-size:14px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-family:system-ui,sans-serif;font-size:14px;margin-bottom:14px}
+select,button{font:inherit;font-family:system-ui,sans-serif;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 12px;cursor:pointer}
+button.main{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600}
+button:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px}
+.tabs button{white-space:nowrap}
+.tabs button[aria-pressed="true"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.q{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.q.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent2)}
+.q h3{margin:0 0 6px;font-size:17px}
+.q .a{margin:0 0 10px;color:var(--ink)}
+.q.hide .a{filter:blur(6px);user-select:none}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+#status{font-family:system-ui,sans-serif;font-size:14px;color:var(--mute);min-height:20px}
+</style>
+</head>
+<body>
+<main>
+<h1>Luyện nói – Audio theo chủ đề</h1>
+<p class="sub">Bấm nghe câu hỏi của cô, tự trả lời, rồi nghe đáp án mẫu. Dùng giọng đọc có sẵn trong trình duyệt.</p>
+
+<div class="bar">
+  <label>Giọng đọc <select id="voice"></select></label>
+  <label>Tốc độ <select id="rate"><option value="0.7">Chậm</option><option value="0.85" selected>Vừa</option><option value="1">Bình thường</option></select></label>
+  <label><input type="checkbox" id="hideAns"> Ẩn đáp án</label>
+</div>
+
+<div class="tabs" id="tabs" role="group" aria-label="Chủ đề"></div>
+<div class="row" style="margin-bottom:14px">
+  <button class="main" id="playTopic">▶ Nghe cả chủ đề (hỏi → đáp)</button>
+  <button id="practice">🎤 Luyện tập (hỏi → chờ bạn trả lời → đáp án)</button>
+  <button id="stop">■ Dừng</button>
+</div>
+<div id="status" aria-live="polite"></div>
+<div id="list"></div>
+</main>
+
+<script>
+const T=[
+{n:"Work – Công việc",q:[
+["Have you ever worked part time?","Yes, I have. I worked part-time in a coffee shop."],
+["What kind of job do you want to do in the future?","I want to be a software developer because I like technology."],
+["What have you been doing to prepare for your future job?","I have been learning English and practicing programming."],
+["What do you do to get ready for a job interview?","I prepare my CV and wear nice clothes. I also practice answering questions."]]},
+{n:"Technology – Công nghệ",q:[
+["What invention do you think is useful for your study?","I think the computer is very useful because I can study and find information."],
+["What do you usually do on the Internet?","I usually study English, watch videos and chat with my friends."],
+["Do you prefer using a mobile phone or a laptop to study online?","I prefer using a laptop because it has a bigger screen and is easier to use."],
+["Do you know any famous inventor?","Yes, I do. I know Thomas Edison. He invented the light bulb."]]},
+{n:"Holidays – Kỳ nghỉ",q:[
+["What activities do you like to do when you are on holiday?","I like travelling, taking photos and eating local food."],
+["What kind of accommodation do you like to stay in when you are on holiday?","I like staying in hotels because they are comfortable and convenient."],
+["Have you ever had any problems on holiday?","Yes, I have. I once lost my phone during a trip."],
+["Do you prefer travelling in a group or on your own?","I prefer travelling in a group because I can have fun with my friends."]]},
+{n:"Products – Sản phẩm",q:[
+["What is the last thing you bought online?","I bought a T-shirt online last week. It was cheap and beautiful."],
+["How important do you think logos are?","I think logos are important because they help people remember a brand."],
+["Which websites do you visit when you want to buy things such as clothes, shoes, and books?","I usually visit Shopee because it has many products and good prices."],
+["What do you think makes one website better than another?","I think a good website should be easy to use, beautiful and fast."]]},
+{n:"History – Lịch sử",q:[
+["Do you often play video games with your friends?","Yes, I do. I often play video games with my friends at weekends."],
+["What sorts of game are popular in your country?","Mobile games and online games are very popular in Vietnam."],
+["Do you think that video games are bad for you?","Not always. They can help us relax, but playing too much is bad."],
+["What historical place in Vietnam have you ever visited?","I have visited the Independence Palace in Ho Chi Minh City. It was very interesting."]]},
+{n:"Nature – Thiên nhiên",q:[
+["If you could live in another country, where would you move to?","I would like to live in Japan because it is beautiful and safe."],
+["If you won a lot of money, would you stop working or studying?","No, I wouldn't. I would continue studying because education is important."],
+["What is your favorite animal?","My favorite animal is the dog because it is friendly and cute."],
+["Have you ever visited a zoo?","Yes, I have. I visited a zoo with my family. It was fun."]]}
+];
+const synth=window.speechSynthesis;let cur=0,token=0,voices=[];
+const $=id=>document.getElementById(id);
+function loadVoices(){voices=synth.getVoices().filter(v=>/^en/i.test(v.lang));const s=$("voice"),old=s.value;s.innerHTML="";voices.forEach((v,i)=>{const o=document.createElement("option");o.value=i;o.textContent=v.name+" ("+v.lang+")";s.appendChild(o)});const p=voices.findIndex(v=>/en-US|en-GB/.test(v.lang));if(old)s.value=old;else if(p>=0)s.value=p}
+if(synth){loadVoices();synth.onvoiceschanged=loadVoices}else $("status").textContent="Trình duyệt này không hỗ trợ đọc giọng nói.";
+function say(text){return new Promise(res=>{const u=new SpeechSynthesisUtterance(text);const v=voices[$("voice").value];if(v){u.voice=v;u.lang=v.lang}else u.lang="en-US";u.rate=+$("rate").value;u.onend=res;u.onerror=res;synth.speak(u)})}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function stop(){token++;synth.cancel();$("status").textContent="";document.querySelectorAll(".q").forEach(e=>e.classList.remove("active"))}
+function mark(i){document.querySelectorAll(".q").forEach((e,j)=>e.classList.toggle("active",i===j));const e=document.querySelectorAll(".q")[i];if(e)e.scrollIntoView({block:"nearest",behavior:"smooth"})}
+async function one(i,mode,t){const [q,a]=T[cur].q[i];mark(i);
+ if(mode!=="a"){$("status").textContent="Cô hỏi…";await say(q);if(t!==token)return}
+ if(mode==="practice"){$("status").textContent="Đến lượt bạn trả lời…";await wait(9000);if(t!==token)return;reveal(i)}
+ if(mode!=="q"){$("status").textContent="Đáp án mẫu…";if(mode!=="a")await wait(500);await say(a)}}
+function reveal(i){document.querySelectorAll(".q")[i].classList.remove("hide")}
+async function run(mode){stop();const t=token;for(let i=0;i<T[cur].q.length;i++){await one(i,mode,t);if(t!==token)return;await wait(900)}if(t===token){$("status").textContent="Xong chủ đề này!";mark(-1)}}
+function render(){const l=$("list");l.innerHTML="";T[cur].q.forEach(([q,a],i)=>{const d=document.createElement("div");d.className="q"+($("hideAns").checked?" hide":"");d.innerHTML='<h3></h3><p class="a"></p><div class="row"><button>🔊 Câu hỏi</button><button>🔊 Đáp án</button><button>🔊 Cả hai</button><button>👁 Hiện/ẩn</button></div>';d.querySelector("h3").textContent=q;d.querySelector(".a").textContent=a;const b=d.querySelectorAll("button");b[0].onclick=()=>{stop();const t=token;one(i,"q",t)};b[1].onclick=()=>{stop();const t=token;one(i,"a",t)};b[2].onclick=()=>{stop();const t=token;one(i,"qa",t)};b[3].onclick=()=>d.classList.toggle("hide");l.appendChild(d)})}
+function tabs(){const t=$("tabs");t.innerHTML="";T.forEach((x,i)=>{const b=document.createElement("button");b.textContent=x.n;b.setAttribute("aria-pressed",i===cur);b.onclick=()=>{stop();cur=i;tabs();render()};t.appendChild(b)})}
+$("playTopic").onclick=()=>run("qa");$("practice").onclick=()=>run("practice");$("stop").onclick=stop;$("hideAns").onchange=render;
+tabs();render();
+</script>
+</body>
+</html>
